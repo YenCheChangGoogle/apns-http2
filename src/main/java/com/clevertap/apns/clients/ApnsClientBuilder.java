@@ -44,10 +44,16 @@ import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 import java.util.concurrent.TimeUnit;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * A builder to build an APNS client.
  */
 public class ApnsClientBuilder {
+	
+	private static Logger logger=LoggerFactory.getLogger(ApnsClientBuilder.class);
+	
     private InputStream certificate;
     private boolean production;
     private String password;
@@ -73,6 +79,8 @@ public class ApnsClientBuilder {
      * @return a new OkHttp client builder, intialized with default settings.
      */
     public static OkHttpClient.Builder createDefaultOkHttpClientBuilder() {
+    	logger.debug("");
+    	
         OkHttpClient.Builder builder = new OkHttpClient.Builder();
         builder.connectTimeout(10, TimeUnit.SECONDS).writeTimeout(10, TimeUnit.SECONDS).readTimeout(30, TimeUnit.SECONDS);
         builder.connectionPool(new ConnectionPool(10, 10, TimeUnit.MINUTES));

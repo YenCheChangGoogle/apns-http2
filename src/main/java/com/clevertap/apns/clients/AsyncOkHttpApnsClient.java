@@ -30,11 +30,6 @@
 
 package com.clevertap.apns.clients;
 
-import com.clevertap.apns.Notification;
-import com.clevertap.apns.NotificationResponse;
-import com.clevertap.apns.NotificationResponseListener;
-import okhttp3.*;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.KeyManagementException;
@@ -43,10 +38,25 @@ import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.clevertap.apns.Notification;
+import com.clevertap.apns.NotificationResponse;
+import com.clevertap.apns.NotificationResponseListener;
+
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.ConnectionPool;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
+
 /**
  * A wrapper around OkHttp's http client to send out notifications using Apple's HTTP/2 API.
  */
 public class AsyncOkHttpApnsClient extends SyncOkHttpApnsClient {
+	private static Logger logger=LoggerFactory.getLogger(AsyncOkHttpApnsClient.class);
 
     public AsyncOkHttpApnsClient(String apnsAuthKey, String teamID, String keyID,
                                  boolean production, String defaultTopic, ConnectionPool connectionPool) {
@@ -96,16 +106,19 @@ public class AsyncOkHttpApnsClient extends SyncOkHttpApnsClient {
 
     @Override
     public void push(Notification notification, NotificationResponseListener nrl) {
+    	logger.debug("");
         final Request request = buildRequest(notification);
 
         client.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
+            	logger.debug("");
                 nrl.onFailure(notification, new NotificationResponse(null, -1, null, e));
             }
 
             @Override
             public void onResponse(Call call, Response response) throws IOException {
+            	logger.debug("");
                 final NotificationResponse nr;
 
                 try {
@@ -124,6 +137,8 @@ public class AsyncOkHttpApnsClient extends SyncOkHttpApnsClient {
                 } else {
                     nrl.onFailure(notification, nr);
                 }
+                
+                logger.debug("");
             }
         });
 

@@ -30,25 +30,52 @@
 
 package com.clevertap.apns.clients;
 
-import com.clevertap.apns.*;
-import com.clevertap.apns.internal.Constants;
-import com.clevertap.apns.internal.JWT;
-import okhttp3.*;
-import okio.BufferedSink;
-
-import javax.net.ssl.*;
 import java.io.IOException;
 import java.io.InputStream;
-import java.security.*;
+import java.security.InvalidKeyException;
+import java.security.KeyManagementException;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.SignatureException;
+import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.security.spec.InvalidKeySpecException;
 import java.util.UUID;
 
+import javax.net.ssl.KeyManager;
+import javax.net.ssl.KeyManagerFactory;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSocketFactory;
+import javax.net.ssl.TrustManagerFactory;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.clevertap.apns.ApnsClient;
+import com.clevertap.apns.CertificateUtils;
+import com.clevertap.apns.Notification;
+import com.clevertap.apns.NotificationRequestError;
+import com.clevertap.apns.NotificationResponse;
+import com.clevertap.apns.NotificationResponseListener;
+import com.clevertap.apns.internal.Constants;
+import com.clevertap.apns.internal.JWT;
+
+import okhttp3.ConnectionPool;
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
+import okio.BufferedSink;
+
 /**
  * A wrapper around OkHttp's http client to send out notifications using Apple's HTTP/2 API.
  */
 public class SyncOkHttpApnsClient implements ApnsClient {
+	
+	private static Logger logger=LoggerFactory.getLogger(SyncOkHttpApnsClient.class);
 
     private final String defaultTopic;
     private final String apnsAuthKey;
@@ -309,11 +336,14 @@ public class SyncOkHttpApnsClient implements ApnsClient {
 
     @Override
     public NotificationResponse push(Notification notification) {
+    	logger.debug("");
         final Request request = buildRequest(notification);
         Response response = null;
 
         try {
+        	logger.debug("");
             response = client.newCall(request).execute();
+            logger.debug("");
             return parseResponse(response);
         } catch (Throwable t) {
             return new NotificationResponse(null, -1, null, t);
@@ -330,16 +360,19 @@ public class SyncOkHttpApnsClient implements ApnsClient {
     }
 
     protected NotificationResponse parseResponse(Response response) throws IOException {
+    	logger.debug("");
         String contentBody = null;
         int statusCode = response.code();
-
+        logger.debug("statusCode="+statusCode);
         NotificationRequestError error = null;
 
         if (response.code() != 200) {
+        	logger.debug(""+response.body());
             error = NotificationRequestError.get(statusCode);
             contentBody = response.body() != null ? response.body().string() : null;
         }
-
+        
+        logger.debug("");
         return new NotificationResponse(error, statusCode, contentBody, null);
     }
 }

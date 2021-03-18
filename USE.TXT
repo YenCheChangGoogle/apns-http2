@@ -1,0 +1,13 @@
+Apple Push Notification service (APNs)
+
+使用JDK1.8
+
+測試程式碼 Demo.java
+Device_Token : 375c78f0411c3246ffcc85faae33438a080a854ad131ba55df9709fc259020ed
+Credentials  : D:/Senao/bitbucket.org/prod_appsvc.git/WebContent/apps_cert_files/SPLUS2R.p12 密碼是 qwer1234
+topic        : tw.com.senao.splus2rInhouse
+
+執行Demo.class 在啟動的部位
+設定 Bootstrap 加入 appn-boot-8.1.13.v20181017.jar 才可以正常執行
+或
+包裝Demo.class成JAR檔案後, 使用指令 java -Xbootclasspath/p:alpn-boot-8.1.13.v20181017.jar -jar Demo.jar
